@@ -10,6 +10,7 @@ class User {
   final String? website;
   final int verify;
   final int role;
+  final int violationCount;
   final DateTime createdAt;
   final DateTime updatedAt;
   final UserStats? stats;
@@ -26,6 +27,7 @@ class User {
     this.website,
     required this.verify,
     required this.role,
+    required this.violationCount,
     required this.createdAt,
     required this.updatedAt,
     this.stats,
@@ -44,6 +46,7 @@ class User {
       website: json['website'],
       verify: json['verify'] ?? 0,
       role: json['role'] ?? 0,
+      violationCount: json['violation_count'] ?? 0,
       createdAt: DateTime.parse(
         json['created_at'] ?? DateTime.now().toIso8601String(),
       ),

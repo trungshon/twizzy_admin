@@ -217,6 +217,16 @@ class _UsersPageState extends State<UsersPage> {
                             Expanded(
                               child: Text(
                                 'Status',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                'Vi phạm',
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -225,6 +235,7 @@ class _UsersPageState extends State<UsersPage> {
                             Expanded(
                               child: Text(
                                 'Ngày tham gia',
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -234,6 +245,7 @@ class _UsersPageState extends State<UsersPage> {
                               width: 100,
                               child: Text(
                                 'Thao tác',
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -408,23 +420,43 @@ class _UserRow extends StatelessWidget {
 
           // Status
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 4,
-              ),
-              decoration: BoxDecoration(
-                color: _statusColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                user.verifyStatusText,
-                style: TextStyle(
-                  color: _statusColor,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
                 ),
-                textAlign: TextAlign.center,
+                decoration: BoxDecoration(
+                  color: _statusColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  user.verifyStatusText,
+                  style: TextStyle(
+                    color: _statusColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+
+          // Violations
+          Expanded(
+            child: Text(
+              '${user.violationCount}',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color:
+                    user.violationCount > 0
+                        ? AppTheme.errorColor
+                        : AppTheme.textSecondary,
+                fontWeight:
+                    user.violationCount > 0
+                        ? FontWeight.bold
+                        : null,
               ),
             ),
           ),
@@ -433,6 +465,7 @@ class _UserRow extends StatelessWidget {
           Expanded(
             child: Text(
               DateFormat('MMM d, yyyy').format(user.createdAt),
+              textAlign: TextAlign.center,
               style: const TextStyle(
                 color: AppTheme.textSecondary,
               ),

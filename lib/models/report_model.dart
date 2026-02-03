@@ -40,6 +40,8 @@ class Report {
   final ReportStatus status;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? action;
+  final String? adminId;
   final User? reporter;
   final Twizz? twizz;
 
@@ -52,6 +54,8 @@ class Report {
     required this.status,
     required this.createdAt,
     required this.updatedAt,
+    this.action,
+    this.adminId,
     this.reporter,
     this.twizz,
   });
@@ -66,6 +70,8 @@ class Report {
       status: ReportStatus.values[json['status']],
       createdAt: DateTime.parse(json['created_at']).toLocal(),
       updatedAt: DateTime.parse(json['updated_at']).toLocal(),
+      action: json['action'],
+      adminId: json['admin_id'],
       reporter:
           json['reporter'] != null
               ? User.fromJson(json['reporter'])

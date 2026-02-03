@@ -94,12 +94,14 @@ class TwizzUser {
   final String name;
   final String username;
   final String? avatar;
+  final int violationCount;
 
   TwizzUser({
     required this.id,
     required this.name,
     required this.username,
     this.avatar,
+    this.violationCount = 0,
   });
 
   factory TwizzUser.fromJson(Map<String, dynamic> json) {
@@ -108,6 +110,7 @@ class TwizzUser {
       name: json['name'] ?? '',
       username: json['username'] ?? '',
       avatar: json['avatar'],
+      violationCount: json['violation_count'] ?? 0,
     );
   }
 }

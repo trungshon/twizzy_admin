@@ -119,6 +119,42 @@ class _ReportsPageState extends State<ReportsPage> {
                         const SizedBox(height: 4),
                         Text('Mô tả: ${report.description}'),
                       ],
+                      if (report.status !=
+                              ReportStatus.pending &&
+                          report.action != null) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryColor
+                                .withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(
+                              4,
+                            ),
+                            border: Border.all(
+                              color: AppTheme.primaryColor
+                                  .withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.info_outline,
+                                size: 16,
+                                color: AppTheme.primaryColor,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Cách xử lý: ${_getActionLabel(report.action!)}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primaryColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       const Divider(),
                       if (report.twizz != null) ...[
                         const Text(
@@ -131,11 +167,71 @@ class _ReportsPageState extends State<ReportsPage> {
                         TwizzCard(
                           twizz: report.twizz!,
                           showDelete: false,
-                          onDelete: () {
-                            // Maybe implement direct delete if needed,
-                            // but they have specialized buttons below
-                          },
+                          onDelete: () {},
                         ),
+                        if (report.twizz?.user != null) ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: (report
+                                              .twizz!
+                                              .user!
+                                              .violationCount >
+                                          0
+                                      ? Colors.red
+                                      : Colors.blue)
+                                  .withValues(alpha: 0.1),
+                              borderRadius:
+                                  BorderRadius.circular(4),
+                              border: Border.all(
+                                color: (report
+                                                .twizz!
+                                                .user!
+                                                .violationCount >
+                                            0
+                                        ? Colors.red
+                                        : Colors.blue)
+                                    .withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.warning_amber_rounded,
+                                  size: 16,
+                                  color:
+                                      report
+                                                  .twizz!
+                                                  .user!
+                                                  .violationCount >
+                                              0
+                                          ? Colors.red
+                                          : Colors.blue,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Số lần vi phạm của người này: ${report.twizz!.user!.violationCount}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        report
+                                                    .twizz!
+                                                    .user!
+                                                    .violationCount >
+                                                0
+                                            ? Colors.red
+                                            : Colors.blue,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ],
                       const SizedBox(height: 12),
                       if (report.status == ReportStatus.pending)
@@ -150,15 +246,6 @@ class _ReportsPageState extends State<ReportsPage> {
                                     'ignore',
                                   ),
                               child: const Text('Bỏ qua'),
-                            ),
-                            const SizedBox(width: 8),
-                            ElevatedButton(
-                              onPressed:
-                                  () => viewModel.handleReport(
-                                    report.id,
-                                    'warn',
-                                  ),
-                              child: const Text('Cảnh cáo'),
                             ),
                             const SizedBox(width: 8),
                             ElevatedButton(
@@ -337,5 +424,18 @@ class _ReportsPageState extends State<ReportsPage> {
         ),
       ),
     );
+  }
+
+  String _getActionLabel(String action) {
+    switch (action) {
+      case 'delete':
+        return 'Xóa bài viết';
+      case 'ban':
+        return 'Khóa người dùng';
+      case 'ignore':
+        return 'Bỏ qua báo cáo';
+      default:
+        return action;
+    }
   }
 }
