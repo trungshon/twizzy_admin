@@ -2,6 +2,7 @@ import 'api_service.dart';
 import '../models/dashboard_model.dart';
 import '../models/user_model.dart';
 import '../models/twizz_model.dart';
+import '../models/report_model.dart';
 import '../core/constants/app_constants.dart';
 
 class AdminService {
@@ -124,5 +125,45 @@ class AdminService {
     await _api.delete(
       '${AppConstants.adminApiPath}/twizzs/$twizzId',
     );
+  }
+
+  // Reports Management
+  Future<({List<Report> reports, Pagination pagination})>
+  getReports({int page = 1, int limit = 10, int? status}) async {
+    final queryParams = <String, String>{
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
+    if (status != null) {
+      queryParams['status'] = status.toString();
+    }
+
+    final response = await _api.get(
+      '/reports',
+      queryParams: queryParams,
+    );
+
+    final result = response['result'];
+    final reports =
+        (result['reports'] as List<dynamic>)
+            .map((e) => Report.fromJson(e))
+            .toList();
+    final pagination = Pagination.fromJson(result['pagination']);
+
+    return (reports: reports, pagination: pagination);
+  }
+
+  Future<void> handleReport(
+    String reportId,
+    String action,
+  ) async {
+    await _api.patch(
+      '/reports/$reportId',
+      body: {'action': action},
+    );
+  }
+
+  Future<void> deleteReport(String reportId) async {
+    await _api.delete('/reports/$reportId');
   }
 }

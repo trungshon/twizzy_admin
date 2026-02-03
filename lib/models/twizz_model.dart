@@ -56,12 +56,16 @@ class Twizz {
           [],
       guestViews: json['guest_views'] ?? 0,
       userViews: json['user_views'] ?? 0,
-      createdAt: DateTime.parse(
-        json['created_at'] ?? DateTime.now().toIso8601String(),
-      ),
-      updatedAt: DateTime.parse(
-        json['updated_at'] ?? DateTime.now().toIso8601String(),
-      ),
+      createdAt:
+          DateTime.parse(
+            json['created_at'] ??
+                DateTime.now().toIso8601String(),
+          ).toLocal(),
+      updatedAt:
+          DateTime.parse(
+            json['updated_at'] ??
+                DateTime.now().toIso8601String(),
+          ).toLocal(),
       user:
           json['user'] != null
               ? TwizzUser.fromJson(json['user'])

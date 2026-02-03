@@ -6,6 +6,7 @@ import 'viewmodels/auth_viewmodel.dart';
 import 'viewmodels/dashboard_viewmodel.dart';
 import 'viewmodels/users_viewmodel.dart';
 import 'viewmodels/twizzs_viewmodel.dart';
+import 'viewmodels/reports_viewmodel.dart';
 import 'views/auth/login_page.dart';
 import 'views/main/main_shell.dart';
 
@@ -33,6 +34,9 @@ class TwizzyAdminApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(create: (_) => UsersViewModel()),
         ChangeNotifierProvider(create: (_) => TwizzsViewModel()),
+        ChangeNotifierProvider(
+          create: (_) => ReportsViewModel(),
+        ),
       ],
       child: MaterialApp(
         title: 'Twizzy Admin',

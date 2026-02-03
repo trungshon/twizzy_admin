@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../dashboard/dashboard_page.dart';
 import '../users/users_page.dart';
 import '../twizzs/twizzs_page.dart';
+import '../reports/reports_page.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -20,6 +21,7 @@ class _MainShellState extends State<MainShell> {
     _NavItem(icon: Icons.dashboard, label: 'Tổng quan'),
     _NavItem(icon: Icons.people, label: 'Người dùng'),
     _NavItem(icon: Icons.article, label: 'Bài viết'),
+    _NavItem(icon: Icons.report, label: 'Báo cáo'),
   ];
 
   Widget _getPage(int index) {
@@ -30,6 +32,8 @@ class _MainShellState extends State<MainShell> {
         return const UsersPage();
       case 2:
         return const TwizzsPage();
+      case 3:
+        return const ReportsPage();
       default:
         return const DashboardPage();
     }
