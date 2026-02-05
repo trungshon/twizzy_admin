@@ -68,4 +68,15 @@ class ReportsViewModel extends ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<void> deleteProcessedReports() async {
+    try {
+      await _adminService.deleteProcessedReports();
+      await loadReports(page: 1);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
 }

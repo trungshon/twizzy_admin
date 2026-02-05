@@ -166,4 +166,8 @@ class AdminService {
   Future<void> deleteReport(String reportId) async {
     await _api.delete('/reports/$reportId');
   }
+
+  Future<void> deleteProcessedReports() async {
+    await _api.delete('/reports/bulk/processed');
+  }
 }

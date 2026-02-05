@@ -30,6 +30,86 @@ class _ReportsPageState extends State<ReportsPage> {
         actions: [
           Consumer<ReportsViewModel>(
             builder: (context, viewModel, child) {
+              return TextButton.icon(
+                onPressed: () async {
+                  final confirmed =
+                      await showDialog<bool>(
+                        context: context,
+                        builder:
+                            (context) => AlertDialog(
+                              title: const Text(
+                                'Xác nhận xóa tất cả',
+                              ),
+                              content: const Text(
+                                'Bạn có chắc chắn muốn xóa tất cả các báo cáo đã xử lý (Đã giải quyết/Bỏ qua) không?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed:
+                                      () => Navigator.pop(
+                                        context,
+                                        false,
+                                      ),
+                                  child: const Text('Hủy'),
+                                ),
+                                TextButton(
+                                  onPressed:
+                                      () => Navigator.pop(
+                                        context,
+                                        true,
+                                      ),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor:
+                                        AppTheme.errorColor,
+                                  ),
+                                  child: const Text(
+                                    'Xóa tất cả',
+                                  ),
+                                ),
+                              ],
+                            ),
+                      ) ??
+                      false;
+
+                  if (confirmed && context.mounted) {
+                    try {
+                      await viewModel.deleteProcessedReports();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Đã xóa tất cả báo cáo đã xử lý',
+                            ),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(
+                          SnackBar(content: Text('Lỗi: $e')),
+                        );
+                      }
+                    }
+                  }
+                },
+                icon: const Icon(
+                  Icons.delete_sweep,
+                  color: AppTheme.errorColor,
+                ),
+                label: const Text(
+                  'Xóa đã xử lý',
+                  style: TextStyle(color: AppTheme.errorColor),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+          Consumer<ReportsViewModel>(
+            builder: (context, viewModel, child) {
               return DropdownButton<int?>(
                 value: viewModel.selectedStatus,
                 hint: const Text('Lọc theo trạng thái'),

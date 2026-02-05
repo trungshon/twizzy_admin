@@ -3,9 +3,6 @@ import 'package:provider/provider.dart';
 import '../../viewmodels/twizzs_viewmodel.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/twizz_model.dart';
-// ignore: avoid_web_libraries_in_flutter
-import 'package:web/web.dart' as web;
-import 'dart:ui_web' as ui_web;
 import '../../widgets/twizz_card.dart';
 
 class TwizzsPage extends StatefulWidget {
