@@ -10,7 +10,7 @@ class ApiService {
 
   String? _accessToken;
   String? _refreshToken;
-  bool _isRefreshing = false;
+  Future<void>? _refreshFuture;
   Future<void> Function()? _onRefreshToken;
   void Function()? _onLogout;
 
@@ -154,15 +154,22 @@ class ApiService {
       return data;
     } else if (response.statusCode == 401 &&
         _refreshToken != null &&
-        !_isRefreshing &&
         _onRefreshToken != null) {
-      _isRefreshing = true;
+      // If already refreshing, wait for it to complete
+      if (_refreshFuture != null) {
+        await _refreshFuture;
+        return await retry();
+      }
+
+      // Start new refresh process
+      _refreshFuture = _onRefreshToken?.call();
+
       try {
-        await _onRefreshToken!();
-        _isRefreshing = false;
+        await _refreshFuture;
+        _refreshFuture = null; // Clear after success
         return await retry();
       } catch (e) {
-        _isRefreshing = false;
+        _refreshFuture = null; // Clear after failure
         await clearTokens();
         _onLogout?.call();
         throw UnauthorizedException(
