@@ -13,6 +13,7 @@ class Twizz {
   final DateTime createdAt;
   final DateTime updatedAt;
   final TwizzUser? user;
+  final Twizz? parentTwizz;
 
   Twizz({
     required this.id,
@@ -29,6 +30,7 @@ class Twizz {
     required this.createdAt,
     required this.updatedAt,
     this.user,
+    this.parentTwizz,
   });
 
   factory Twizz.fromJson(Map<String, dynamic> json) {
@@ -69,6 +71,10 @@ class Twizz {
       user:
           json['user'] != null
               ? TwizzUser.fromJson(json['user'])
+              : null,
+      parentTwizz:
+          json['parent_twizz'] != null
+              ? Twizz.fromJson(json['parent_twizz'])
               : null,
     );
   }

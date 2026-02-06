@@ -11,12 +11,14 @@ class TwizzCard extends StatelessWidget {
   final Twizz twizz;
   final VoidCallback onDelete;
   final bool showDelete;
+  final bool isEmbedded;
 
   const TwizzCard({
     super.key,
     required this.twizz,
     required this.onDelete,
     this.showDelete = true,
+    this.isEmbedded = false,
   });
 
   Color get _typeColor {
@@ -27,6 +29,8 @@ class TwizzCard extends StatelessWidget {
         return AppTheme.successColor;
       case 2:
         return AppTheme.warningColor;
+      case 3:
+        return AppTheme.textSecondary;
       default:
         return AppTheme.textSecondary;
     }
@@ -49,198 +53,245 @@ class TwizzCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // User Avatar
-        CircleAvatar(
-          radius: 24,
-          backgroundColor: AppTheme.primaryColor.withValues(
-            alpha: 0.1,
-          ),
-          backgroundImage:
-              twizz.user?.avatar != null &&
-                      twizz.user!.avatar!.isNotEmpty
-                  ? NetworkImage(
-                    _getMediaUrl(twizz.user!.avatar!),
-                  )
-                  : null,
-          child:
-              twizz.user?.avatar == null ||
-                      twizz.user!.avatar!.isEmpty
-                  ? Text(
-                    twizz.user?.name.isNotEmpty == true
-                        ? twizz.user!.name[0].toUpperCase()
-                        : '?',
-                    style: const TextStyle(
-                      color: AppTheme.primaryColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  )
-                  : null,
-        ),
-        const SizedBox(width: 16),
-
-        // Content
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // User info & Type
-              Row(
-                children: [
-                  if (twizz.user != null) ...[
-                    Text(
-                      twizz.user!.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '@${twizz.user!.username}',
-                      style: const TextStyle(
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                  ],
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _typeColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      twizz.typeText,
-                      style: TextStyle(
-                        color: _typeColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-
-              // Content
-              Text(
-                twizz.content,
-                maxLines: 10, // Increased for reports
-                overflow: TextOverflow.ellipsis,
-              ),
-
-              // Media (Images/Videos)
-              if (twizz.medias.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                SizedBox(
-                  height: 150,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: twizz.medias.length,
-                    separatorBuilder:
-                        (_, __) => const SizedBox(width: 8),
-                    itemBuilder: (context, index) {
-                      final media = twizz.medias[index];
-                      // type 0 = image, type 1 = video
-                      if (media.type == 0) {
-                        return ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            _getMediaUrl(media.url),
-                            height: 150,
-                            fit: BoxFit.cover,
-                            errorBuilder:
-                                (_, __, ___) => Container(
-                                  height: 150,
-                                  width: 150,
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.cardColor,
-                                    borderRadius:
-                                        BorderRadius.circular(8),
-                                  ),
-                                  child: const Icon(
-                                    Icons.broken_image_outlined,
-                                    color:
-                                        AppTheme.textSecondary,
-                                  ),
-                                ),
-                          ),
-                        );
-                      } else {
-                        // Web Video Player
-                        return Container(
-                          height: 150,
-                          width: 250,
-                          decoration: BoxDecoration(
-                            color: Colors.black,
-                            borderRadius: BorderRadius.circular(
-                              8,
-                            ),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                              8,
-                            ),
-                            child: _WebVideoPlayer(
-                              url: _getMediaUrl(
-                                media.url,
-                                isVideo: true,
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-                    },
-                  ),
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration:
+          isEmbedded
+              ? BoxDecoration(
+                border: Border.all(
+                  color: AppTheme.textSecondary.withOpacity(0.3),
                 ),
-              ],
-              const SizedBox(height: 12),
-
-              // Stats & Actions
-              Row(
-                children: [
-                  const Icon(
-                    Icons.access_time,
-                    size: 16,
-                    color: AppTheme.textSecondary,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    DateFormat(
-                      'MMM d, yyyy • HH:mm',
-                    ).format(twizz.createdAt.toLocal()),
-                    style: const TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 12,
-                    ),
-                  ),
-                  const Spacer(),
-                  if (showDelete)
-                    TextButton.icon(
-                      icon: const Icon(
-                        Icons.delete_outline,
-                        size: 18,
-                        color: AppTheme.errorColor,
+                borderRadius: BorderRadius.circular(12),
+                color: AppTheme.cardColor.withOpacity(0.5),
+              )
+              : null,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // User Avatar
+          CircleAvatar(
+            radius: isEmbedded ? 16 : 24,
+            backgroundColor: AppTheme.primaryColor.withValues(
+              alpha: 0.1,
+            ),
+            backgroundImage:
+                twizz.user?.avatar != null &&
+                        twizz.user!.avatar!.isNotEmpty
+                    ? NetworkImage(
+                      _getMediaUrl(twizz.user!.avatar!),
+                    )
+                    : null,
+            child:
+                twizz.user?.avatar == null ||
+                        twizz.user!.avatar!.isEmpty
+                    ? Text(
+                      twizz.user?.name.isNotEmpty == true
+                          ? twizz.user!.name[0].toUpperCase()
+                          : '?',
+                      style: TextStyle(
+                        color: AppTheme.primaryColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: isEmbedded ? 14 : 16,
                       ),
-                      label: const Text(
-                        'Xóa',
-                        style: TextStyle(
-                          color: AppTheme.errorColor,
+                    )
+                    : null,
+          ),
+          const SizedBox(width: 16),
+
+          // Content
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // User info & Type
+                Row(
+                  children: [
+                    if (twizz.user != null) ...[
+                      Text(
+                        twizz.user!.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      onPressed: onDelete,
+                      const SizedBox(width: 8),
+                      Text(
+                        '@${twizz.user!.username}',
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                    const Spacer(),
+                    if (!isEmbedded)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _typeColor.withValues(
+                            alpha: 0.1,
+                          ),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          twizz.typeText,
+                          style: TextStyle(
+                            color: _typeColor,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                // Content
+                Text(
+                  twizz.content,
+                  maxLines: 10, // Increased for reports
+                  overflow: TextOverflow.ellipsis,
+                ),
+
+                // Media (Images/Videos)
+                if (twizz.medias.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 150,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: twizz.medias.length,
+                      separatorBuilder:
+                          (_, __) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        final media = twizz.medias[index];
+                        // type 0 = image, type 1 = video
+                        if (media.type == 0) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                              8,
+                            ),
+                            child: Image.network(
+                              _getMediaUrl(media.url),
+                              height: 150,
+                              fit: BoxFit.cover,
+                              errorBuilder:
+                                  (_, __, ___) => Container(
+                                    height: 150,
+                                    width: 150,
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.cardColor,
+                                      borderRadius:
+                                          BorderRadius.circular(
+                                            8,
+                                          ),
+                                    ),
+                                    child: const Icon(
+                                      Icons
+                                          .broken_image_outlined,
+                                      color:
+                                          AppTheme.textSecondary,
+                                    ),
+                                  ),
+                            ),
+                          );
+                        } else {
+                          // Web Video Player
+                          return Container(
+                            height: 150,
+                            width: 250,
+                            decoration: BoxDecoration(
+                              color: Colors.black,
+                              borderRadius:
+                                  BorderRadius.circular(8),
+                            ),
+                            child: ClipRRect(
+                              borderRadius:
+                                  BorderRadius.circular(8),
+                              child: _WebVideoPlayer(
+                                url: _getMediaUrl(
+                                  media.url,
+                                  isVideo: true,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                      },
                     ),
+                  ),
                 ],
-              ),
-            ],
+
+                // Parent Twizz (if exists) - Only for Quotes (2) and Comments (1)
+                if (twizz.parentTwizz != null &&
+                    twizz.type != 0) ...[
+                  const SizedBox(height: 12),
+                  if (twizz.type == 1) // Comment
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        'Đang bình luận:',
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontStyle: FontStyle.italic,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  TwizzCard(
+                    twizz: twizz.parentTwizz!,
+                    onDelete:
+                        () {}, // No delete callback for embedded
+                    showDelete: false,
+                    isEmbedded: true,
+                  ),
+                ],
+
+                const SizedBox(height: 12),
+
+                // Stats & Actions
+                if (!isEmbedded)
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.access_time,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        DateFormat(
+                          'MMM d, yyyy • HH:mm',
+                        ).format(twizz.createdAt.toLocal()),
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const Spacer(),
+                      if (showDelete)
+                        TextButton.icon(
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            size: 18,
+                            color: AppTheme.errorColor,
+                          ),
+                          label: const Text(
+                            'Xóa',
+                            style: TextStyle(
+                              color: AppTheme.errorColor,
+                            ),
+                          ),
+                          onPressed: onDelete,
+                        ),
+                    ],
+                  ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
