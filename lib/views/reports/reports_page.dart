@@ -137,6 +137,16 @@ class _ReportsPageState extends State<ReportsPage> {
               );
             },
           ),
+          const SizedBox(width: 8),
+          Consumer<ReportsViewModel>(
+            builder: (context, viewModel, child) {
+              return IconButton(
+                icon: const Icon(Icons.refresh),
+                tooltip: 'Làm mới',
+                onPressed: () => viewModel.loadReports(),
+              );
+            },
+          ),
           const SizedBox(width: 16),
         ],
       ),
@@ -160,114 +170,107 @@ class _ReportsPageState extends State<ReportsPage> {
             );
           }
 
-          return ListView.builder(
-            itemCount: viewModel.reports.length,
-            itemBuilder: (context, index) {
-              final report = viewModel.reports[index];
-              return Card(
-                margin: const EdgeInsets.all(8),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Lý do: ${report.reason.label}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
+          return RefreshIndicator(
+            onRefresh: () => viewModel.loadReports(),
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: viewModel.reports.length,
+              itemBuilder: (context, index) {
+                final report = viewModel.reports[index];
+                return Card(
+                  margin: const EdgeInsets.all(8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Lý do: ${report.reason.label}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
+                            _buildStatusBadge(report.status),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Người báo cáo: ${report.reporter?.name ?? report.userId}',
+                        ),
+                        Text(
+                          'Ngày báo cáo: ${DateFormat('MMM d, yyyy • HH:mm').format(report.createdAt.toLocal())}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
                           ),
-                          _buildStatusBadge(report.status),
+                        ),
+                        if (report.description.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text('Mô tả: ${report.description}'),
                         ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Người báo cáo: ${report.reporter?.name ?? report.userId}',
-                      ),
-                      Text(
-                        'Ngày báo cáo: ${DateFormat('MMM d, yyyy • HH:mm').format(report.createdAt.toLocal())}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppTheme.textSecondary,
-                        ),
-                      ),
-                      if (report.description.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text('Mô tả: ${report.description}'),
-                      ],
-                      if (report.status !=
-                              ReportStatus.pending &&
-                          report.action != null) ...[
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppTheme.primaryColor
-                                .withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(
-                              4,
-                            ),
-                            border: Border.all(
-                              color: AppTheme.primaryColor
-                                  .withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.info_outline,
-                                size: 16,
-                                color: AppTheme.primaryColor,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Cách xử lý: ${_getActionLabel(report.action!)}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.primaryColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                      const Divider(),
-                      if (report.twizz != null) ...[
-                        const Text(
-                          'Nội dung bị báo cáo:',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TwizzCard(
-                          twizz: report.twizz!,
-                          showDelete: false,
-                          onDelete: () {},
-                        ),
-                        if (report.twizz?.user != null) ...[
+                        if (report.status !=
+                                ReportStatus.pending &&
+                            report.action != null) ...[
                           const SizedBox(height: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
+                            padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: (report
-                                              .twizz!
-                                              .user!
-                                              .violationCount >
-                                          0
-                                      ? Colors.red
-                                      : Colors.blue)
+                              color: AppTheme.primaryColor
                                   .withValues(alpha: 0.1),
                               borderRadius:
                                   BorderRadius.circular(4),
                               border: Border.all(
+                                color: AppTheme.primaryColor
+                                    .withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.info_outline,
+                                  size: 16,
+                                  color: AppTheme.primaryColor,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Cách xử lý: ${_getActionLabel(report.action!)}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.primaryColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                        const Divider(),
+                        if (report.twizz != null) ...[
+                          const Text(
+                            'Nội dung bị báo cáo:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TwizzCard(
+                            twizz: report.twizz!,
+                            showDelete: false,
+                            onDelete: () {},
+                          ),
+                          if (report.twizz?.user != null) ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              padding:
+                                  const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                              decoration: BoxDecoration(
                                 color: (report
                                                 .twizz!
                                                 .user!
@@ -275,29 +278,26 @@ class _ReportsPageState extends State<ReportsPage> {
                                             0
                                         ? Colors.red
                                         : Colors.blue)
-                                    .withValues(alpha: 0.3),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.warning_amber_rounded,
-                                  size: 16,
-                                  color:
-                                      report
+                                    .withValues(alpha: 0.1),
+                                borderRadius:
+                                    BorderRadius.circular(4),
+                                border: Border.all(
+                                  color: (report
                                                   .twizz!
                                                   .user!
                                                   .violationCount >
                                               0
                                           ? Colors.red
-                                          : Colors.blue,
+                                          : Colors.blue)
+                                      .withValues(alpha: 0.3),
                                 ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Số lần vi phạm của người này: ${report.twizz!.user!.violationCount}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.warning_amber_rounded,
+                                    size: 16,
                                     color:
                                         report
                                                     .twizz!
@@ -307,161 +307,181 @@ class _ReportsPageState extends State<ReportsPage> {
                                             ? Colors.red
                                             : Colors.blue,
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ],
-                      const SizedBox(height: 12),
-                      if (report.status == ReportStatus.pending)
-                        Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.end,
-                          children: [
-                            TextButton(
-                              onPressed:
-                                  () => viewModel.handleReport(
-                                    report.id,
-                                    'ignore',
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Số lần vi phạm của người này: ${report.twizz!.user!.violationCount}',
+                                    style: TextStyle(
+                                      fontWeight:
+                                          FontWeight.bold,
+                                      color:
+                                          report
+                                                      .twizz!
+                                                      .user!
+                                                      .violationCount >
+                                                  0
+                                              ? Colors.red
+                                              : Colors.blue,
+                                    ),
                                   ),
-                              child: const Text('Bỏ qua'),
-                            ),
-                            const SizedBox(width: 8),
-                            ElevatedButton(
-                              onPressed:
-                                  () => viewModel.handleReport(
-                                    report.id,
-                                    'delete',
-                                  ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orange,
-                                foregroundColor: Colors.white,
-                              ),
-                              child: const Text('Xóa bài'),
-                            ),
-                            const SizedBox(width: 8),
-                            ElevatedButton(
-                              onPressed:
-                                  () => viewModel.handleReport(
-                                    report.id,
-                                    'ban',
-                                  ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red,
-                                foregroundColor: Colors.white,
-                              ),
-                              child: const Text(
-                                'Khóa người dùng',
+                                ],
                               ),
                             ),
                           ],
-                        ),
-                      if (report.status != ReportStatus.pending)
-                        Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.end,
-                          children: [
-                            const SizedBox(width: 8),
-                            ElevatedButton.icon(
-                              onPressed: () async {
-                                final confirmed =
-                                    await showDialog<bool>(
-                                      context: context,
-                                      builder:
-                                          (
-                                            context,
-                                          ) => AlertDialog(
-                                            title: const Text(
-                                              'Xác nhận xóa',
-                                            ),
-                                            content: const Text(
-                                              'Bạn có chắc chắn muốn xóa báo cáo này không?',
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed:
-                                                    () =>
-                                                        Navigator.pop(
-                                                          context,
-                                                          false,
-                                                        ),
-                                                child:
-                                                    const Text(
-                                                      'Hủy',
-                                                    ),
+                        ],
+                        const SizedBox(height: 12),
+                        if (report.status ==
+                            ReportStatus.pending)
+                          Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment.end,
+                            children: [
+                              TextButton(
+                                onPressed:
+                                    () => viewModel.handleReport(
+                                      report.id,
+                                      'ignore',
+                                    ),
+                                child: const Text('Bỏ qua'),
+                              ),
+                              const SizedBox(width: 8),
+                              ElevatedButton(
+                                onPressed:
+                                    () => viewModel.handleReport(
+                                      report.id,
+                                      'delete',
+                                    ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange,
+                                  foregroundColor: Colors.white,
+                                ),
+                                child: const Text('Xóa bài'),
+                              ),
+                              const SizedBox(width: 8),
+                              ElevatedButton(
+                                onPressed:
+                                    () => viewModel.handleReport(
+                                      report.id,
+                                      'ban',
+                                    ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                  foregroundColor: Colors.white,
+                                ),
+                                child: const Text(
+                                  'Khóa người dùng',
+                                ),
+                              ),
+                            ],
+                          ),
+                        if (report.status !=
+                            ReportStatus.pending)
+                          Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment.end,
+                            children: [
+                              const SizedBox(width: 8),
+                              ElevatedButton.icon(
+                                onPressed: () async {
+                                  final confirmed =
+                                      await showDialog<bool>(
+                                        context: context,
+                                        builder:
+                                            (
+                                              context,
+                                            ) => AlertDialog(
+                                              title: const Text(
+                                                'Xác nhận xóa',
                                               ),
-                                              TextButton(
-                                                onPressed:
-                                                    () =>
-                                                        Navigator.pop(
-                                                          context,
-                                                          true,
-                                                        ),
-                                                style: TextButton.styleFrom(
-                                                  foregroundColor:
-                                                      AppTheme
-                                                          .errorColor,
+                                              content: const Text(
+                                                'Bạn có chắc chắn muốn xóa báo cáo này không?',
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed:
+                                                      () => Navigator.pop(
+                                                        context,
+                                                        false,
+                                                      ),
+                                                  child:
+                                                      const Text(
+                                                        'Hủy',
+                                                      ),
                                                 ),
-                                                child:
-                                                    const Text(
-                                                      'Xóa',
-                                                    ),
-                                              ),
-                                            ],
-                                          ),
-                                    ) ??
-                                    false;
+                                                TextButton(
+                                                  onPressed:
+                                                      () => Navigator.pop(
+                                                        context,
+                                                        true,
+                                                      ),
+                                                  style: TextButton.styleFrom(
+                                                    foregroundColor:
+                                                        AppTheme
+                                                            .errorColor,
+                                                  ),
+                                                  child:
+                                                      const Text(
+                                                        'Xóa',
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                      ) ??
+                                      false;
 
-                                if (confirmed &&
-                                    context.mounted) {
-                                  try {
-                                    await context
-                                        .read<ReportsViewModel>()
-                                        .deleteReport(report.id);
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            'Đã xóa báo cáo',
+                                  if (confirmed &&
+                                      context.mounted) {
+                                    try {
+                                      await context
+                                          .read<
+                                            ReportsViewModel
+                                          >()
+                                          .deleteReport(
+                                            report.id,
+                                          );
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Đã xóa báo cáo',
+                                            ),
                                           ),
-                                        ),
-                                      );
-                                    }
-                                  } catch (e) {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Lỗi: $e',
+                                        );
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Lỗi: $e',
+                                            ),
                                           ),
-                                        ),
-                                      );
+                                        );
+                                      }
                                     }
                                   }
-                                }
-                              },
-                              icon: const Icon(
-                                Icons.delete_forever,
+                                },
+                                icon: const Icon(
+                                  Icons.delete_forever,
+                                ),
+                                label: const Text('Xóa báo cáo'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      AppTheme.errorColor,
+                                  foregroundColor: Colors.white,
+                                ),
                               ),
-                              label: const Text('Xóa báo cáo'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    AppTheme.errorColor,
-                                foregroundColor: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                    ],
+                            ],
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'services/api_service.dart';
@@ -42,6 +43,7 @@ class TwizzyAdminApp extends StatelessWidget {
         title: 'Twizzy Admin',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
+        scrollBehavior: const MyCustomScrollBehavior(),
         initialRoute: '/',
         routes: {
           '/': (context) => const AuthGuard(child: MainShell()),
@@ -92,4 +94,16 @@ class _AuthGuardState extends State<AuthGuard> {
       },
     );
   }
+}
+
+class MyCustomScrollBehavior extends MaterialScrollBehavior {
+  const MyCustomScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.trackpad,
+    PointerDeviceKind.stylus,
+  };
 }

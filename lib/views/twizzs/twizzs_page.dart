@@ -114,14 +114,26 @@ class _TwizzsPageState extends State<TwizzsPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  if (viewModel.isLoading)
-                    const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.refresh),
+                        tooltip: 'Làm mới',
+                        onPressed:
+                            () => viewModel.loadTwizzs(
+                              refresh: true,
+                            ),
                       ),
-                    ),
+                      if (viewModel.isLoading)
+                        const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        ),
+                    ],
+                  ),
                 ],
               ),
               const SizedBox(height: 24),
@@ -200,22 +212,31 @@ class _TwizzsPageState extends State<TwizzsPage> {
                               'Không tìm thấy bài viết',
                             ),
                           )
-                          : ListView.separated(
-                            padding: const EdgeInsets.all(16),
-                            itemCount: viewModel.twizzs.length,
-                            separatorBuilder:
-                                (_, __) =>
-                                    const Divider(height: 32),
-                            itemBuilder: (context, index) {
-                              final twizz =
-                                  viewModel.twizzs[index];
-                              return TwizzCard(
-                                twizz: twizz,
-                                onDelete:
-                                    () =>
-                                        _showDeleteDialog(twizz),
-                              );
-                            },
+                          : RefreshIndicator(
+                            onRefresh:
+                                () => viewModel.loadTwizzs(
+                                  refresh: true,
+                                ),
+                            child: ListView.separated(
+                              physics:
+                                  const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.all(16),
+                              itemCount: viewModel.twizzs.length,
+                              separatorBuilder:
+                                  (_, __) =>
+                                      const Divider(height: 32),
+                              itemBuilder: (context, index) {
+                                final twizz =
+                                    viewModel.twizzs[index];
+                                return TwizzCard(
+                                  twizz: twizz,
+                                  onDelete:
+                                      () => _showDeleteDialog(
+                                        twizz,
+                                      ),
+                                );
+                              },
+                            ),
                           ),
                 ),
               ),

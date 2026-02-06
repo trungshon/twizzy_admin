@@ -99,14 +99,26 @@ class _UsersPageState extends State<UsersPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  if (viewModel.isLoading)
-                    const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.refresh),
+                        tooltip: 'Làm mới',
+                        onPressed:
+                            () => viewModel.loadUsers(
+                              refresh: true,
+                            ),
                       ),
-                    ),
+                      if (viewModel.isLoading)
+                        const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        ),
+                    ],
+                  ),
                 ],
               ),
               const SizedBox(height: 24),
@@ -266,30 +278,41 @@ class _UsersPageState extends State<UsersPage> {
                                     'Không tìm thấy người dùng',
                                   ),
                                 )
-                                : ListView.separated(
-                                  itemCount:
-                                      viewModel.users.length,
-                                  separatorBuilder:
-                                      (_, __) => const Divider(
-                                        height: 1,
+                                : RefreshIndicator(
+                                  onRefresh:
+                                      () => viewModel.loadUsers(
+                                        refresh: true,
                                       ),
-                                  itemBuilder: (context, index) {
-                                    final user =
-                                        viewModel.users[index];
-                                    return _UserRow(
-                                      user: user,
-                                      onStatusChange:
-                                          () =>
-                                              _showStatusDialog(
-                                                user,
-                                              ),
-                                      onDelete:
-                                          () =>
-                                              _showDeleteDialog(
-                                                user,
-                                              ),
-                                    );
-                                  },
+                                  child: ListView.separated(
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    itemCount:
+                                        viewModel.users.length,
+                                    separatorBuilder:
+                                        (_, __) => const Divider(
+                                          height: 1,
+                                        ),
+                                    itemBuilder: (
+                                      context,
+                                      index,
+                                    ) {
+                                      final user =
+                                          viewModel.users[index];
+                                      return _UserRow(
+                                        user: user,
+                                        onStatusChange:
+                                            () =>
+                                                _showStatusDialog(
+                                                  user,
+                                                ),
+                                        onDelete:
+                                            () =>
+                                                _showDeleteDialog(
+                                                  user,
+                                                ),
+                                      );
+                                    },
+                                  ),
                                 ),
                       ),
                     ],
@@ -486,15 +509,15 @@ class _UserRow extends StatelessWidget {
                   tooltip: 'Đổi trạng thái',
                   onPressed: onStatusChange,
                 ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.delete_outline,
-                    size: 20,
-                    color: AppTheme.errorColor,
-                  ),
-                  tooltip: 'Xóa',
-                  onPressed: onDelete,
-                ),
+                // IconButton(
+                //   icon: const Icon(
+                //     Icons.delete_outline,
+                //     size: 20,
+                //     color: AppTheme.errorColor,
+                //   ),
+                //   tooltip: 'Xóa',
+                //   onPressed: onDelete,
+                // ),
               ],
             ),
           ),
