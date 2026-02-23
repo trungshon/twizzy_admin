@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/twizz_model.dart';
 import '../core/theme/app_theme.dart';
-import '../core/constants/app_constants.dart';
+import '../core/utils/media_utils.dart';
 // ignore: avoid_web_libraries_in_flutter
 import 'package:web/web.dart' as web;
 import 'dart:ui_web' as ui_web;
@@ -36,21 +36,6 @@ class TwizzCard extends StatelessWidget {
     }
   }
 
-  String _getMediaUrl(String? url, {bool isVideo = false}) {
-    if (url == null || url.isEmpty) return '';
-    String finalUrl = url;
-    // Replace emulator IP with localhost for web
-    if (finalUrl.contains('10.0.2.2')) {
-      finalUrl = finalUrl.replaceAll('10.0.2.2', 'localhost');
-    }
-    if (finalUrl.startsWith('http')) return finalUrl;
-    if (finalUrl.startsWith('/')) {
-      return '${AppConstants.baseUrl}$finalUrl';
-    }
-    final String path = isVideo ? 'video-stream' : 'image';
-    return '${AppConstants.baseUrl}/static/$path/$finalUrl';
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -59,10 +44,10 @@ class TwizzCard extends StatelessWidget {
           isEmbedded
               ? BoxDecoration(
                 border: Border.all(
-                  color: AppTheme.textSecondary.withOpacity(0.3),
+                  color: AppTheme.textSecondary.withValues(alpha: 0.3),
                 ),
                 borderRadius: BorderRadius.circular(12),
-                color: AppTheme.cardColor.withOpacity(0.5),
+                color: AppTheme.cardColor.withValues(alpha: 0.5),
               )
               : null,
       child: Row(
@@ -78,7 +63,9 @@ class TwizzCard extends StatelessWidget {
                 twizz.user?.avatar != null &&
                         twizz.user!.avatar!.isNotEmpty
                     ? NetworkImage(
-                      _getMediaUrl(twizz.user!.avatar!),
+                      MediaUtils.getMediaUrl(
+                        twizz.user!.avatar!,
+                      ),
                     )
                     : null,
             child:
@@ -173,7 +160,7 @@ class TwizzCard extends StatelessWidget {
                               8,
                             ),
                             child: Image.network(
-                              _getMediaUrl(media.url),
+                              MediaUtils.getMediaUrl(media.url),
                               height: 150,
                               fit: BoxFit.cover,
                               errorBuilder:
@@ -210,7 +197,7 @@ class TwizzCard extends StatelessWidget {
                               borderRadius:
                                   BorderRadius.circular(8),
                               child: _WebVideoPlayer(
-                                url: _getMediaUrl(
+                                url: MediaUtils.getMediaUrl(
                                   media.url,
                                   isVideo: true,
                                 ),

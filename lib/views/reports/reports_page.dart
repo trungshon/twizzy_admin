@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../viewmodels/reports_viewmodel.dart';
 import '../../models/report_model.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/media_utils.dart';
 import '../../widgets/twizz_card.dart';
 
 class ReportsPage extends StatefulWidget {
@@ -190,7 +191,7 @@ class _ReportsPageState extends State<ReportsPage> {
                               MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Lý do: ${report.reason.label}',
+                              'Lý do: ${report.reasons.map((r) => r.label).join(', ')}',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -199,8 +200,50 @@ class _ReportsPageState extends State<ReportsPage> {
                           ],
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          'Người báo cáo: ${report.reporter?.name ?? report.userId}',
+                        Row(
+                          children: [
+                            Text(
+                              'Người báo cáo: ${report.reporter?.name ?? report.userIds.first}',
+                            ),
+                            if (report.userIds.length > 1) ...[
+                              const SizedBox(width: 8),
+                              InkWell(
+                                onTap:
+                                    () => _showReportersDialog(
+                                      context,
+                                      report,
+                                    ),
+                                child: Container(
+                                  padding:
+                                      const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.errorColor
+                                        .withValues(alpha: 0.1),
+                                    borderRadius:
+                                        BorderRadius.circular(4),
+                                    border: Border.all(
+                                      color: AppTheme.errorColor
+                                          .withValues(
+                                            alpha: 0.3,
+                                          ),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    '+${report.userIds.length - 1} người khác',
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight:
+                                          FontWeight.bold,
+                                      color: AppTheme.errorColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                         Text(
                           'Ngày báo cáo: ${DateFormat('MMM d, yyyy • HH:mm').format(report.createdAt.toLocal())}',
@@ -209,9 +252,11 @@ class _ReportsPageState extends State<ReportsPage> {
                             color: AppTheme.textSecondary,
                           ),
                         ),
-                        if (report.description.isNotEmpty) ...[
+                        if (report.descriptions.isNotEmpty) ...[
                           const SizedBox(height: 4),
-                          Text('Mô tả: ${report.description}'),
+                          Text(
+                            'Mô tả: ${report.descriptions.join(' | ')}',
+                          ),
                         ],
                         if (report.status !=
                                 ReportStatus.pending &&
@@ -537,5 +582,78 @@ class _ReportsPageState extends State<ReportsPage> {
       default:
         return action;
     }
+  }
+
+  void _showReportersDialog(
+    BuildContext context,
+    Report report,
+  ) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              'Danh sách người báo cáo (${report.userIds.length})',
+            ),
+            content: SizedBox(
+              width: 400,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: report.userIds.length,
+                itemBuilder: (context, index) {
+                  final reporter =
+                      (report.reporters != null &&
+                              report.reporters!.length > index)
+                          ? report.reporters![index]
+                          : null;
+                  final userId = report.userIds[index];
+
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: AppTheme.primaryColor
+                          .withValues(alpha: 0.1),
+                      backgroundImage:
+                          (reporter?.avatar != null &&
+                                  reporter!.avatar!.isNotEmpty)
+                              ? NetworkImage(
+                                MediaUtils.getMediaUrl(
+                                  reporter.avatar!,
+                                ),
+                              )
+                              : null,
+                      child:
+                          (reporter?.avatar == null ||
+                                  reporter!.avatar!.isEmpty)
+                              ? Text(
+                                (reporter?.name.isNotEmpty ==
+                                            true
+                                        ? reporter!.name[0]
+                                        : 'u')
+                                    .toUpperCase(),
+                                style: const TextStyle(
+                                  color: AppTheme.primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
+                              : null,
+                    ),
+                    title: Text(reporter?.name ?? userId),
+                    subtitle: Text(
+                      reporter?.username != null
+                          ? '@${reporter!.username}'
+                          : 'ID: $userId',
+                    ),
+                  );
+                },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Đóng'),
+              ),
+            ],
+          ),
+    );
   }
 }
